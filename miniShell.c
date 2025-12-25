@@ -6,7 +6,7 @@
 #include <errno.h>
 #include <signal.h>
 #include <sys/wait.h>
-// how to compile: gcc -o basicShell basicShell.c
+
 
 #define ARGS_SIZE 20
 #define BUFFER_SIZE 255
@@ -33,10 +33,10 @@ void cd(char **args)
     }
 }
 void parseInput(char *input, int *numArgs, char **args, char **history)
-{ // ParseArgs
+{ 
     if (input[0] == '!')
     {
-        int index = atoi(&input[1]); // convert char to int
+        int index = atoi(&input[1]); 
         if (index < 1 || index > HISTORY_SIZE)
         {
             printf("Invalid history index\n");
@@ -54,7 +54,7 @@ void parseInput(char *input, int *numArgs, char **args, char **history)
                 return;
             }
 
-            // replace input with history command
+         
             strcpy(input, history[index - 1]);
             printf("Executing command from history: %s\n", input);
         }
@@ -63,8 +63,8 @@ void parseInput(char *input, int *numArgs, char **args, char **history)
     char *tok = strtok(input, " \n");
 
     while (tok != NULL)
-    {                         // while there are more tokens (\0 or NULL)
-        args[*numArgs] = tok; // store each token in array of strings
+    {                         
+        args[*numArgs] = tok; 
         tok = strtok(NULL, " \n");
 
         (*numArgs)++;
@@ -93,15 +93,14 @@ void IOredirect(char **args, int *numArgs, int *redirect, char **fileName)
             redirectIndex = i;
         }
     }
-    // if redirect != -1 then there is redirection
-    // extract everything after index
+    // if redirect != -1 then there is redirection, extract everything after index
     if (*redirect != -1)
     {
         // handle IO redirection
         *fileName = args[redirectIndex + 1]; // filename is correct
-        // need to remove everything after redirectIndex from args
+        // remove everything after redirectIndex from args
         args[redirectIndex] = NULL;
-        // update numArgs
+        
         (*numArgs) = redirectIndex;
     }
 }
@@ -122,39 +121,38 @@ void addHistory(char *command, char **history, int *historyCount)
 {
     if (*historyCount < HISTORY_SIZE)
     {
-        history[*historyCount] = strdup(command); // strdup allocates memory and copies the string
+        history[*historyCount] = strdup(command); 
         (*historyCount)++;
     }
     else
     {
-        // remove oldest command
+        
         free(history[0]); // free memory of oldest command
         for (int i = 1; i < HISTORY_SIZE; i++)
         {
-            history[i - 1] = history[i]; // shift commands left
+            history[i - 1] = history[i]; t
         }
-        history[HISTORY_SIZE - 1] = strdup(command); // add new command at the end
+        history[HISTORY_SIZE - 1] = strdup(command); 
     }
 }
-// if !index is entered, we replace args w/ command at index
 
 int main()
 {
     int x = 0;
     int redirect;
     char *history[5];
-    int historyCount = 0; // keep track of number of commands in history
+    int historyCount = 0; 
 
     while (x == 0)
     {
         char *args[ARGS_SIZE];
         char buffer[BUFFER_SIZE];
         int numArgs = 0;
-        // int redirect = -1; // 0 for input, 1 for output, -1 for none
+        
         int redirectIndex;
         char *fileName;
         int background = 0; // flag for background process - 0 means no, 1 means yes
-        // for file redirection
+        
 
         signal(SIGCHLD, handleBackground); // set up signal handler to reap background processes
 
@@ -162,20 +160,20 @@ int main()
 
         // GET INPUT IN THE MAIN:
         if (fgets(buffer, BUFFER_SIZE, stdin) == NULL)
-        { // fgets includes the \n
+        { 
             printf("NO INPUT\n");
             exit(1);
         }
-        addHistory(buffer, history, &historyCount); // maybe do this in parseInput?
-        // Add "Buffer to history here"
+        addHistory(buffer, history, &historyCount);
+       
         parseInput(buffer, &numArgs, args, history);
 
         if (args[0] == NULL)
         {
             printf("No command entered\n");
-            continue; // go back to start of while loop
+            continue;
         }
-        // CHECK EXIT
+        
         if (strcmp(args[0], "exit") == 0)
         {
             printf("Exiting\n");
@@ -242,8 +240,8 @@ int main()
                 { // execute args
                     perror("EXECVP failed");
 
-                    fprintf(stderr, "Error code: %d\n", errno);              // print error code
-                    fprintf(stderr, "Error message: %s\n", strerror(errno)); // print error message
+                    fprintf(stderr, "Error code: %d\n", errno);              
+                    fprintf(stderr, "Error message: %s\n", strerror(errno)); 
                 }
                 exit(0); // exit child process after execvp
             }
